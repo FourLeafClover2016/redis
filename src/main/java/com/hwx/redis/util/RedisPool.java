@@ -1,19 +1,16 @@
-package com.hwx.redis.common;
+package com.hwx.redis.util;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
+ * redis 连接池
+ *
  * @author: Huawei Xie
  * @date: 2019/6/11
  */
-//@Component
-public class RedisPool implements ApplicationRunner {
+public class RedisPool {
     /**
      * redis 连接池
      */
@@ -22,51 +19,47 @@ public class RedisPool implements ApplicationRunner {
     /**
      * 最大连接数
      */
-    @Value("${redis.pool.max-totla}")
-    private Integer maxTotal;
+    private static Integer maxTotal = Integer.parseInt(PropertiesUtil.getProperties("redis.pool.max-totla"));
     /**
      * 最大空闲实例个数
      */
-    @Value("${redis.pool.max-idle}")
-    private Integer maxIdle;
+    private static Integer maxIdle = Integer.parseInt(PropertiesUtil.getProperties("redis.pool.max-idle"));
     /**
      * 最小空闲实例个数
      */
-    @Value("${redis.pool.min-idle}")
-    private Integer minIdle;
+    private static Integer minIdle = Integer.parseInt(PropertiesUtil.getProperties("redis.pool.min-idle"));
     /**
      * 在borrow一个jedis实例的时候，是否进行验证操作，如果赋值为true，
      * 得到的jedis实例肯定是可以用的
      */
-    @Value("${redis.testOnBorrow}")
-    private Boolean testOnBorrow;
+    private static Boolean testOnBorrow = Boolean.parseBoolean(PropertiesUtil.getProperties("redis.testOnBorrow"));
 
     /**
      * 在return一个jedis实例时，是否要进行验证操作，如果赋值为true
      * 则放回jedispool实例肯定是可以用的
      */
-    @Value("${redis.testOnReturn}")
-    private Boolean testOnReturn;
+    private static Boolean testOnReturn = Boolean.parseBoolean(PropertiesUtil.getProperties("redis.testOnReturn"));
 
     /**
      * redis 主机地址
      */
-    @Value("${redis.host}")
-    private String redisIP;
+    private static String redisIP = PropertiesUtil.getProperties("redis.host");
 
     /**
      * redis 端口
      */
-    @Value("${redis.port}")
-    private Integer redisPort;
+    private static Integer redisPort = Integer.parseInt(PropertiesUtil.getProperties("redis.port"));
 
     /**
      * 超时时间
      */
-    @Value("${redis.timeout}")
-    private int timeout;
+    private static int timeout = Integer.parseInt(PropertiesUtil.getProperties("redis.timeout"));
 
-    private void initPool() {
+    static {
+        initPool();
+    }
+
+    private static void initPool() {
         JedisPoolConfig config = new JedisPoolConfig();
         config.setMaxTotal(maxTotal);
         config.setMaxIdle(maxIdle);
@@ -85,20 +78,16 @@ public class RedisPool implements ApplicationRunner {
      *
      * @return
      */
-    public Jedis getJedis() {
+    public static Jedis getJedis() {
         return pool.getResource();
     }
 
-    public void returnResource(Jedis jedis) {
+    public static void returnResource(Jedis jedis) {
         pool.returnResource(jedis);
     }
 
-    public void returnBrokenResource(Jedis jedis) {
+    public static void returnBrokenResource(Jedis jedis) {
         pool.returnBrokenResource(jedis);
     }
 
-    @Override
-    public void run(ApplicationArguments applicationArguments) throws Exception {
-        initPool();
-    }
 }
